@@ -310,6 +310,6 @@ if __name__ == '__main__':
         if(gene == brute_force):
             correct_path+=1
 
-    print(f"Percentage of found path is shortest: {(correct_path/TESTS) * 100}%")
+    print(f"Percentage of correct path found by genetic algorithm: {(correct_path/TESTS) * 100}%")
     print(f"Total brute force algorithm runtime: {brute_force_time_performance:0.5f} seconds")
     print(f"Total genetic algorithm algorithm runtime: {genetic_time_performance:0.5f} seconds")
