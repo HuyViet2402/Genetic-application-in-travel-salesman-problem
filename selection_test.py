@@ -2,7 +2,7 @@ import random
 import time
 import numpy as np
 from itertools import permutations
-POPULATION_SIZE = 1000
+POPULATION_SIZE = 100
 MUTATION_RATE = 0.1
 INT_MAX = 999999
 CITIES = 10
@@ -129,7 +129,7 @@ def find_most_repeated_element(lst):
         lst: The input list.
 
     Returns:
-        A tuple containing the most repeated element and its count.
+        max_count: times the most common element get 
     """
 
     count_dict = {}
@@ -140,8 +140,53 @@ def find_most_repeated_element(lst):
             count_dict[element] = 1
 
     max_count = max(count_dict.values())
-
     return max_count
+def count_non_repeated(lst):
+    """Finds the number of element that does not get repeated in a list.
+
+    Args:
+        lst: The input list.
+
+    Returns:
+        non_repeated_count: number of element that does not get repeated
+    """
+
+    count_dict = {}
+    for element in lst:
+        if element in count_dict:
+            count_dict[element] += 1
+        else:
+            count_dict[element] = 1
+    non_repeated_count = 0
+    for count in count_dict.values():
+        if count == 1:
+            non_repeated_count+=1
+
+    return non_repeated_count 
+
+def count_repeated(lst):
+    """Finds the number of element that get repeated in a list.
+
+    Args:
+        lst: The input list.
+
+    Returns:
+        non_repeated_count: number of element that get repeated
+    """
+
+    count_dict = {}
+    for element in lst:
+        if element in count_dict:
+            count_dict[element] += 1
+        else:
+            count_dict[element] = 1
+    repeated_count = 0
+    for count in count_dict.values():
+        if count > 1:
+            repeated_count+=1
+
+    return repeated_count 
+
 population = [Individual(Individual.create_gnome()) for _ in range(POPULATION_SIZE)]
 def tournament_test():
     new_population = []
@@ -149,7 +194,11 @@ def tournament_test():
         new_population.append(tournament_selection(population))
     
     most_repeted_time = find_most_repeated_element(new_population)
+    non_repeated_count = count_non_repeated(new_population)
+    repeated_count = count_repeated(new_population)
     print(f"Percentage of time the tournament selection return same individual: {(most_repeted_time/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the tournament selection return non repeated individual: {(non_repeated_count/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the tournament selection return repeated individual: {(repeated_count/POPULATION_SIZE)*100}%")
 
 def rank_test():
     new_population = []
@@ -157,7 +206,11 @@ def rank_test():
         new_population.append(rank_selection(population))
     
     most_repeted_time = find_most_repeated_element(new_population)
+    non_repeated_count = count_non_repeated(new_population)
+    repeated_count = count_repeated(new_population)
     print(f"Percentage of time the rank selection return same individual: {(most_repeted_time/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the rank selection return non repeated individual: {(non_repeated_count/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the rank selection return repeated individual: {(repeated_count/POPULATION_SIZE)*100}%")
 
 def roulette_wheel_test():
     new_population = []
@@ -165,12 +218,22 @@ def roulette_wheel_test():
         new_population.append(roulette_wheel(population))
     
     most_repeted_time = find_most_repeated_element(new_population)
+    non_repeated_count = count_non_repeated(new_population)
+    repeated_count = count_repeated(new_population)
+
     print(f"Percentage of time the roulette wheel selection return same individual: {(most_repeted_time/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the roulette wheel selection return non repeated individual: {(non_repeated_count/POPULATION_SIZE)*100}%")
+    print(f"Percentage of time the roulette wheel selection return repeated individual: {(repeated_count/POPULATION_SIZE)*100}%")
 
 if __name__ == '__main__':
     # for i in population:
     #     print (i.chromosome)
+    tournament_test()
     rank_test()
     roulette_wheel_test()
     #rank_selection(population)
     #roulette_wheel(population)
+
+    #Conclusion:
+    #Tournament selection can lead to a population where the most common element becomes overrepresented.
+    #Roulette
