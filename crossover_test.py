@@ -5,7 +5,7 @@ from itertools import permutations
 POPULATION_SIZE = 3
 MUTATION_RATE = 0.1
 INT_MAX = 999999
-CITIES = 3
+CITIES = 10
 TESTS = 10
 GENERATIONS = 50
 
@@ -95,7 +95,7 @@ class Individual(object):
         child2 = [None] * len(self.chromosome)
 
         visited = set()
-        start_index = random.randint(0, len(self.chromosome) - 1)
+        start_index = 0
         current_index = start_index
 
         while current_index not in visited:
@@ -108,8 +108,8 @@ class Individual(object):
 
         for i in range(len(self.chromosome)):
             if i not in visited:
-                child1[i] = self.chromosome[i]
-                child2[i] = partner.chromosome[i]
+                child1[i] = partner.chromosome[i]
+                child2[i] = self.chromosome[i]
 
         return Individual(child1), Individual(child2)
     
@@ -139,37 +139,40 @@ class Individual(object):
         return Individual(child1), Individual(child2) # watch
     #order crossover
     def order_crossover(self, partner):
-        start = random.randint(0, len(self.chromosome) - 1)
-        end = random.randint(start, len(self.chromosome) - 1) 
-
+        start = random.randint(0, len(self.chromosome) - 2)
+        end = random.randint(start+1, len(self.chromosome) - 1) 
+        #push tomorrow
         child1 = [None] * len(self.chromosome)
         child2 = [None] * len(self.chromosome)
         
         child1[start:end+1] = self.chromosome[start:end+1]
         child2[start:end+1] = partner.chromosome[start:end+1]
 
-        i, j, k, l = (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome)
-        while k != end and l != end:
-            while self.chromosome[i] in child2 and i != end:
-                i = (i + 1) % len(self.chromosome)
-            while partner.chromosome[j] in child1 and j != end:
+        startIndex = (end + 1) % len(self.chromosome)
+        j = (end + 1) % len(self.chromosome)
+        k = (end + 1) % len(self.chromosome)
+        for i in range(startIndex, len(self.chromosome)):
+            if partner.chromosome[i] not in child1:
+                child1[j] = partner.chromosome[i] 
                 j = (j + 1) % len(self.chromosome)
-
-            child1[k] = partner.chromosome[j]
-            child2[l] = self.chromosome[i]
-            if k != end:
+            if self.chromosome[i] not in child2:
+                child2[k] = self.chromosome[i] 
                 k = (k + 1) % len(self.chromosome)
-            if l != end:
-                l = (l + 1) % len(self.chromosome)
 
+        for i in range(0, startIndex):
+            if partner.chromosome[i] not in child1:
+                child1[j] = partner.chromosome[i] 
+                j = (j + 1) % len(self.chromosome)
+            if self.chromosome[i] not in child2:
+                child2[k] = self.chromosome[i] 
+                k = (k + 1) % len(self.chromosome)
         return Individual(child1), Individual(child2) 
 ################################### Crossover ################################################
 
 if __name__ == '__main__':
-    #edge case
-        population = [Individual(Individual.create_gnome()) for _ in range(POPULATION_SIZE)]
-        route_a = Individual([0, 1, 2])
-        route_b = Individual([1, 0, 2])
-        child_a, child_b = route_a.PMX_crossover(route_b)
-        print(child_a.chromosome)
-        print(child_b.chromosome)       
+    population = [Individual(Individual.create_gnome()) for _ in range(POPULATION_SIZE)]
+    route_a = Individual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    route_b = Individual([4, 5 ,2, 1, 8, 0, 7, 6, 9, 3])
+    child_a, child_b = route_a.order_crossover(route_b)
+    print(child_a.chromosome)
+    print(child_b.chromosome)       

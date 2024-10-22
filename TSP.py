@@ -52,26 +52,86 @@ class Individual(object):
 
         return Individual(child_chromosome)
     
+    # def one_point_crossover(self, partner):
+    #     point =  random.randint(0, len(self.chromosome) - 1)
+    #     child1 = self.chromosome[:point] + partner.chromosome[point:]
+    #     child2 = partner.chromosome[:point] + self.chromosome[point:]
+    #     return Individual(child1), Individual(child2)
+
     def one_point_crossover(self, partner):
-        point =  random.randint(0, len(self.chromosome) - 1)
-        child1 = self.chromosome[:point] + partner.chromosome[point:]
-        child2 = partner.chromosome[:point] + self.chromosome[point:]
-        return Individual(child1), Individual(child2) #maybe stuck local minima
-    
+        # Generate a random crossover point
+        point = random.randint(0, len(self.chromosome) - 1)
+
+        # Create child templates from the crossover point
+        child1 = self.chromosome[:point]
+        child2 = partner.chromosome[:point]
+
+        for gene in partner.chromosome:
+            if gene not in child1:
+                child1.append(gene)
+
+        for gene in self.chromosome:
+            if gene not in child2:
+                child2.append(gene)
+
+        return Individual(child1), Individual(child2)
+
+    # def uniform_crossover(self, partner):
+    #     child1 = list(self.chromosome)
+    #     child2 = list(partner.chromosome)
+    #     for i in range(len(self.chromosome)):
+    #         if bool(random.getrandbits(1)):
+    #             child1[i], child2[i] = child2[i], child1[i]
+    #     return Individual(child1), Individual(child2)
+
     def uniform_crossover(self, partner):
-        child1 = list(self.chromosome)
-        child2 = list(partner.chromosome)
+        # Initialize two empty chromosomes for the offspring
+        child1 = [None] * len(self.chromosome)
+        child2 = [None] * len(self.chromosome)
+
+        # Track genes already added to avoid duplicates
+        used_in_child1 = set()
+        used_in_child2 = set()
+
+        # Perform uniform crossover by iterating through each gene
         for i in range(len(self.chromosome)):
             if bool(random.getrandbits(1)):
-                child1[i], child2[i] = child2[i], child1[i]
+                # Swap genes between parents for child1 and child2
+                if partner.chromosome[i] not in used_in_child1:
+                    child1[i] = partner.chromosome[i]
+                    used_in_child1.add(partner.chromosome[i])
+                if self.chromosome[i] not in used_in_child2:
+                    child2[i] = self.chromosome[i]
+                    used_in_child2.add(self.chromosome[i])
+            else:
+                # Keep the genes from the respective parents
+                if self.chromosome[i] not in used_in_child1:
+                    child1[i] = self.chromosome[i]
+                    used_in_child1.add(self.chromosome[i])
+                if partner.chromosome[i] not in used_in_child2:
+                    child2[i] = partner.chromosome[i]
+                    used_in_child2.add(partner.chromosome[i])
+        # Fill in any missing genes to avoid None values
+        for i in range(len(self.chromosome)):
+            if child1[i] is None:
+                for gene in self.chromosome:
+                    if gene not in used_in_child1:
+                        child1[i] = gene
+                        used_in_child1.add(gene)
+                        break
+            if child2[i] is None:
+                for gene in partner.chromosome:
+                    if gene not in used_in_child2:
+                        child2[i] = gene
+                        used_in_child2.add(gene)
+                        break
         return Individual(child1), Individual(child2)
-    
     def cycle_crossover(self, partner):
         child1 = [None] * len(self.chromosome)
         child2 = [None] * len(self.chromosome)
 
         visited = set()
-        start_index = random.randint(0, len(self.chromosome) - 1)
+        start_index = 0
         current_index = start_index
 
         while current_index not in visited:
@@ -84,61 +144,92 @@ class Individual(object):
 
         for i in range(len(self.chromosome)):
             if i not in visited:
-                child1[i] = self.chromosome[i]
-                child2[i] = partner.chromosome[i]
+                child1[i] = partner.chromosome[i]
+                child2[i] = self.chromosome[i]
 
         return Individual(child1), Individual(child2)
     
+    # def PMX_crossover(self, partner):
+    #     start = random.randint(0, len(self.chromosome) - 1)
+    #     end = random.randint(start, len(self.chromosome) - 1)
+
+    #     child1 = [None] * len(self.chromosome)
+    #     child2 = [None] * len(self.chromosome)
+        
+    #     child1[start:end+1] = partner.chromosome[start:end+1]
+    #     child2[start:end+1] = self.chromosome[start:end+1]
+
+    #     mapping1 = {}
+    #     mapping2 = {}
+
+    #     for i in range(start, end + 1):
+    #         mapping1[self.chromosome[i]] = partner.chromosome[i]
+    #         mapping2[partner.chromosome[i]] = self.chromosome[i]
+
+    #     for i in range(len(self.chromosome)):
+    #         if child1[i] is None:
+    #             child1[i] = mapping1.get(self.chromosome[i], self.chromosome[i])
+    #         if child2[i] is None:
+    #             child2[i] = mapping2.get(partner.chromosome[i], partner.chromosome[i])
+
+    #     return Individual(child1), Individual(child2) # watch
+
     def PMX_crossover(self, partner):
         start = random.randint(0, len(self.chromosome) - 1)
         end = random.randint(start, len(self.chromosome) - 1)
 
-        child1 = [None] * len(self.chromosome)
-        child2 = [None] * len(self.chromosome)
-        
-        child1[start:end+1] = partner.chromosome[start:end+1]
-        child2[start:end+1] = self.chromosome[start:end+1]
+        print("start:", start)
+        print("end:", end)
+        def PMX_one_offspring(p1, p2):
+            offspring = np.zeros(len(p1), dtype=p1.dtype)
 
-        mapping1 = {}
-        mapping2 = {}
+            # Copy the mapping section (middle) from parent1
+            offspring[start:end + 1] = p1[start:end + 1]
+            print(offspring)
+            # copy the rest from parent2 (provided it's not already there
+            for i in np.concatenate([np.arange(0, start), np.arange(end + 1, len(p1))]):
+                candidate = p2[i]
+                while candidate in p1[start:end + 1]:  # allows for several successive mappings
+                    print(f"Candidate {candidate} not valid in position {i}")  # DEBUGONLY
+                    candidate = p2[np.where(p1 == candidate)[0][0]]
+                    print(candidate)
+                offspring[i] = candidate
+            return offspring
 
-        for i in range(start, end + 1):
-            mapping1[self.chromosome[i]] = partner.chromosome[i]
-            mapping2[partner.chromosome[i]] = self.chromosome[i]
+        child1 = PMX_one_offspring(np.array(self.chromosome), np.array(partner.chromosome))
+        child2 = PMX_one_offspring(np.array(partner.chromosome), np.array(self.chromosome))
 
-        for i in range(len(self.chromosome)):
-            if child1[i] is None:
-                child1[i] = mapping1.get(self.chromosome[i], self.chromosome[i])
-            if child2[i] is None:
-                child2[i] = mapping2.get(partner.chromosome[i], partner.chromosome[i])
-
-        return Individual(child1), Individual(child2) # watch
-    #order crossover
+        return Individual(child1.tolist()), Individual(child2.tolist())
+    
     def order_crossover(self, partner):
-        start = random.randint(0, len(self.chromosome) - 1)
-        end = random.randint(start, len(self.chromosome) - 1) 
-
+        start = random.randint(0, len(self.chromosome) - 2)
+        end = random.randint(start+1, len(self.chromosome) - 1) 
+        #push tomorrow
         child1 = [None] * len(self.chromosome)
         child2 = [None] * len(self.chromosome)
         
         child1[start:end+1] = self.chromosome[start:end+1]
         child2[start:end+1] = partner.chromosome[start:end+1]
 
-        i, j, k, l = (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome), (end + 1) % len(self.chromosome)
-        while k != end and l != end:
-            while self.chromosome[i] in child2 and i != end:
-                i = (i + 1) % len(self.chromosome)
-            while partner.chromosome[j] in child1 and j != end:
+        startIndex = (end + 1) % len(self.chromosome)
+        j = (end + 1) % len(self.chromosome)
+        k = (end + 1) % len(self.chromosome)
+        for i in range(startIndex, len(self.chromosome)):
+            if partner.chromosome[i] not in child1:
+                child1[j] = partner.chromosome[i] 
                 j = (j + 1) % len(self.chromosome)
-
-            child1[k] = partner.chromosome[j]
-            child2[l] = self.chromosome[i]
-            if k != end:
+            if self.chromosome[i] not in child2:
+                child2[k] = self.chromosome[i] 
                 k = (k + 1) % len(self.chromosome)
-            if l != end:
-                l = (l + 1) % len(self.chromosome)
 
-        return Individual(child1), Individual(child2) 
+        for i in range(0, startIndex):
+            if partner.chromosome[i] not in child1:
+                child1[j] = partner.chromosome[i] 
+                j = (j + 1) % len(self.chromosome)
+            if self.chromosome[i] not in child2:
+                child2[k] = self.chromosome[i] 
+                k = (k + 1) % len(self.chromosome)
+        return Individual(child1), Individual(child2)
 ################################### Crossover ################################################
 ################################### Mutation ################################################
     def swap_mutate(self):
