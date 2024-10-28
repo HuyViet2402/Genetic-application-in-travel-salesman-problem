@@ -5,9 +5,9 @@ from itertools import permutations
 POPULATION_SIZE = 100
 MUTATION_RATE = 0.1
 INT_MAX = 999999
-CITIES = 10
+CITIES = 9
 TESTS = 10
-GENERATIONS = 50
+GENERATIONS = 100
 # Distance matrix: distance_matrix[i][j] is the distance from city i to city j
 def create_graph(cities, min_dis, max_dis):
     graph = [[0] * cities for _ in range(cities)]  # Create an empty 2D list
@@ -178,21 +178,21 @@ class Individual(object):
         start = random.randint(0, len(self.chromosome) - 1)
         end = random.randint(start, len(self.chromosome) - 1)
 
-        print("start:", start)
-        print("end:", end)
+        # print("start:", start)
+        # print("end:", end)
         def PMX_one_offspring(p1, p2):
             offspring = np.zeros(len(p1), dtype=p1.dtype)
 
             # Copy the mapping section (middle) from parent1
             offspring[start:end + 1] = p1[start:end + 1]
-            print(offspring)
+            # print(offspring)
             # copy the rest from parent2 (provided it's not already there
             for i in np.concatenate([np.arange(0, start), np.arange(end + 1, len(p1))]):
                 candidate = p2[i]
                 while candidate in p1[start:end + 1]:  # allows for several successive mappings
-                    print(f"Candidate {candidate} not valid in position {i}")  # DEBUGONLY
+                   # print(f"Candidate {candidate} not valid in position {i}")  # DEBUGONLY
                     candidate = p2[np.where(p1 == candidate)[0][0]]
-                    print(candidate)
+                    # print(candidate)
                 offspring[i] = candidate
             return offspring
 
@@ -204,7 +204,6 @@ class Individual(object):
     def order_crossover(self, partner):
         start = random.randint(0, len(self.chromosome) - 2)
         end = random.randint(start+1, len(self.chromosome) - 1) 
-        #push tomorrow
         child1 = [None] * len(self.chromosome)
         child2 = [None] * len(self.chromosome)
         
@@ -351,7 +350,7 @@ def genetic_algorithm():
         while (len(new_generation) < int(POPULATION_SIZE * 0.8)):
             parent1 = rank_selection(population) 
             parent2 = rank_selection(population) 
-            child1, child2= parent1.order_crossover(parent2)
+            child1, child2= parent1.PMX_crossover(parent2)
             if random.random() < 0.1:
                 child1.swap_mutate()  # Mutate the child
             if random.random() < 0.1:
