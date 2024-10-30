@@ -2,10 +2,10 @@ import random
 import time
 import numpy as np
 from itertools import permutations
-POPULATION_SIZE = 100
+POPULATION_SIZE = 100 # n
 MUTATION_RATE = 0.1
 INT_MAX = 999999
-CITIES = 9
+CITIES = 10 # m
 TESTS = 10
 GENERATIONS = 100
 # Distance matrix: distance_matrix[i][j] is the distance from city i to city j
@@ -127,6 +127,16 @@ class Individual(object):
                         break
         return Individual(child1), Individual(child2)
     def cycle_crossover(self, partner):
+        ''' Return 2 children
+            1. start with the first gene of parent 1
+            2. look at the gene at the same position of parent 2
+            3. go to the position with the same gene in parent 1
+            4. add this gene index to the cycle
+            5. repeat the steps 2-5 until we arrive at the starting gene of this cycle
+            m is length of the chromosome (number of cities)
+            Time complexity: O(2m)
+            Space complexity: O(2m)
+        '''
         child1 = [None] * len(self.chromosome)
         child2 = [None] * len(self.chromosome)
 
@@ -202,6 +212,15 @@ class Individual(object):
         return Individual(child1.tolist()), Individual(child2.tolist())
     
     def order_crossover(self, partner):
+        ''' Return 2 children
+            1. Select a random swath of consecutive gene from parent 1
+            2. Drop the swath down to Child 1 and mark out these gene in Parent 2.
+            3. Starting on the right side of the swath, grab gene from parent 2 in order not in child 1 and insert them in Child 1 at the right edge of the swath. 
+            4. flip Parent 1 and Parent 2 and go back to Step 1 to produce child 2
+            m is length of the chromosome (number of cities)
+            Time complexity: O(2m)
+            Space complexity: O(2m)
+        '''
         start = random.randint(0, len(self.chromosome) - 2)
         end = random.randint(start+1, len(self.chromosome) - 1) 
         child1 = [None] * len(self.chromosome)
@@ -232,7 +251,10 @@ class Individual(object):
 ################################### Crossover ################################################
 ################################### Mutation ################################################
     def swap_mutate(self):
-        ''' Mutate the chromosome by swapping two cities '''
+        ''' Mutate the chromosome by swapping two cities
+            Time complexity: O(1)
+            Space complexity: O(1)
+        '''
         idx1 = random.randint(0, len(self.chromosome) - 1)
         idx2 = random.randint(0, len(self.chromosome) - 1)
         self.chromosome[idx1], self.chromosome[idx2] = self.chromosome[idx2], self.chromosome[idx1]
@@ -291,9 +313,9 @@ def roulette_wheel(population):
         
 def rank_selection(population):
     ''' Choosing parent based on their fitness
-        Assign each individual rank based on their fitness
-        The higher the fitness, the higher the rank, the higher the chance to get selected
-        The chance of getting selected is not propotional to the fitness
+        1. Assign each individual rank based on their fitness
+        2. The higher the fitness, the higher the rank, the higher the chance to get selected
+        3. The chance of getting selected is not propotional to the fitness
         n is population size
         Time complexity: O(n log n) + O(2n)
         Space complexity: O(n)
@@ -321,6 +343,7 @@ def tournament_selection(population, k=10):
 ################################### Selection ################################################
 ####################################################################################################
 def genetic_algorithm():
+
     # Initialize population
     population = [Individual(Individual.create_gnome()) for _ in range(POPULATION_SIZE)]
     generation = 1
@@ -350,7 +373,7 @@ def genetic_algorithm():
         while (len(new_generation) < int(POPULATION_SIZE * 0.8)):
             parent1 = rank_selection(population) 
             parent2 = rank_selection(population) 
-            child1, child2= parent1.PMX_crossover(parent2)
+            child1, child2= parent1.order_crossover(parent2)
             if random.random() < 0.1:
                 child1.swap_mutate()  # Mutate the child
             if random.random() < 0.1:
@@ -371,8 +394,8 @@ def genetic_algorithm():
 
 
 def brute_force_algorithm():
-    #n: number of cites
-    # Time complexity: O(n!)
+    #m: number of cites
+    # Time complexity: O(m!)
     # Space complexity: O(1)
     min = INT_MAX
     min_path = []
