@@ -35,9 +35,9 @@ def genetic_algorithm(distance_matrix):
         # Crossover: Generate the rest of the population by mating
         #for _ in range(POPULATION_SIZE - elite_size):
         while (len(new_generation) < int(value.POPULATION_SIZE * 0.8)):
-            parent1 = selection.rank_selection(population) 
-            parent2 = selection.rank_selection(population) 
-            child1, child2 = crossover.cycle_crossover(parent1, parent2, distance_matrix)
+            parent1 = selection.tournament_selection(population) 
+            parent2 = selection.tournament_selection(population) 
+            child1, child2 = crossover.order_crossover(parent1, parent2, distance_matrix)
             if random.random() < 0.1:
                 mutate.inverse_mutate(child1)
                 child1.calculate_fitness(distance_matrix)

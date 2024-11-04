@@ -15,74 +15,74 @@ def mate(partner1, partner2):
             child_chromosome.append(city)
     return Individual(child_chromosome)
 
-# def one_point_crossover(self, partner):
-#     point =  random.randint(0, len(self.chromosome) - 1)
-#     child1 = self.chromosome[:point] + partner.chromosome[point:]
-#     child2 = partner.chromosome[:point] + self.chromosome[point:]
-#     return Individual(child1), Individual(child2)
-
 def one_point_crossover(partner1, partner2, distance_matrix):
-    # Generate a random crossover point
-    point = random.randint(0, len(partner1.chromosome) - 1)
-    # Create child templates from the crossover point
-    child1 = partner1.chromosome[:point]
-    child2 = partner2.chromosome[:point]
-    for gene in partner2.chromosome:
-        if gene not in child1:
-            child1.append(gene)
-    for gene in partner1.chromosome:
-        if gene not in child2:
-            child2.append(gene)
+    point =  random.randint(0, len(partner1.chromosome) - 1)
+    child1 = partner1.chromosome[:point] + partner2.chromosome[point:]
+    child2 = partner2.chromosome[:point] + partner1.chromosome[point:]
     return Individual(child1, distance_matrix), Individual(child2, distance_matrix)
 
-# def uniform_crossover(self, partner):
-#     child1 = list(self.chromosome)
-#     child2 = list(partner.chromosome)
-#     for i in range(len(self.chromosome)):
-#         if bool(random.getrandbits(1)):
-#             child1[i], child2[i] = child2[i], child1[i]
-#     return Individual(child1), Individual(child2)
+# def one_point_crossover(partner1, partner2, distance_matrix):
+#     # Generate a random crossover point
+#     point = random.randint(0, len(partner1.chromosome) - 1)
+#     # Create child templates from the crossover point
+#     child1 = partner1.chromosome[:point]
+#     child2 = partner2.chromosome[:point]
+#     for gene in partner2.chromosome:
+#         if gene not in child1:
+#             child1.append(gene)
+#     for gene in partner1.chromosome:
+#         if gene not in child2:
+#             child2.append(gene)
+#     return Individual(child1, distance_matrix), Individual(child2, distance_matrix)
 
 def uniform_crossover(partner1, partner2, distance_matrix):
-    # Initialize two empty chromosomes for the offspring
-    child1 = [None] * len(partner1.chromosome)
-    child2 = [None] * len(partner1.chromosome)
-    # Track genes already added to avoid duplicates
-    used_in_child1 = set()
-    used_in_child2 = set()
-    # Perform uniform crossover by iterating through each gene
+    child1 = list(partner1.chromosome)
+    child2 = list(partner2.chromosome)
     for i in range(len(partner1.chromosome)):
         if bool(random.getrandbits(1)):
-            # Swap genes between parents for child1 and child2
-            if partner2.chromosome[i] not in used_in_child1:
-                child1[i] = partner2.chromosome[i]
-                used_in_child1.add(partner2.chromosome[i])
-            if partner1.chromosome[i] not in used_in_child2:
-                child2[i] = partner1.chromosome[i]
-                used_in_child2.add(partner1.chromosome[i])
-        else:
-            # Keep the genes from the respective parents
-            if partner1.chromosome[i] not in used_in_child1:
-                child1[i] = partner1.chromosome[i]
-                used_in_child1.add(partner1.chromosome[i])
-            if partner2.chromosome[i] not in used_in_child2:
-                child2[i] = partner2.chromosome[i]
-                used_in_child2.add(partner2.chromosome[i])
-    # Fill in any missing genes to avoid None values
-    for i in range(len(partner1.chromosome)):
-        if child1[i] is None:
-            for gene in partner1.chromosome:
-                if gene not in used_in_child1:
-                    child1[i] = gene
-                    used_in_child1.add(gene)
-                    break
-        if child2[i] is None:
-            for gene in partner2.chromosome:
-                if gene not in used_in_child2:
-                    child2[i] = gene
-                    used_in_child2.add(gene)
-                    break
+            child1[i], child2[i] = child2[i], child1[i]
     return Individual(child1, distance_matrix), Individual(child2, distance_matrix)
+
+# def uniform_crossover(partner1, partner2, distance_matrix):
+#     # Initialize two empty chromosomes for the offspring
+#     child1 = [None] * len(partner1.chromosome)
+#     child2 = [None] * len(partner1.chromosome)
+#     # Track genes already added to avoid duplicates
+#     used_in_child1 = set()
+#     used_in_child2 = set()
+#     # Perform uniform crossover by iterating through each gene
+#     for i in range(len(partner1.chromosome)):
+#         if bool(random.getrandbits(1)):
+#             # Swap genes between parents for child1 and child2
+#             if partner2.chromosome[i] not in used_in_child1:
+#                 child1[i] = partner2.chromosome[i]
+#                 used_in_child1.add(partner2.chromosome[i])
+#             if partner1.chromosome[i] not in used_in_child2:
+#                 child2[i] = partner1.chromosome[i]
+#                 used_in_child2.add(partner1.chromosome[i])
+#         else:
+#             # Keep the genes from the respective parents
+#             if partner1.chromosome[i] not in used_in_child1:
+#                 child1[i] = partner1.chromosome[i]
+#                 used_in_child1.add(partner1.chromosome[i])
+#             if partner2.chromosome[i] not in used_in_child2:
+#                 child2[i] = partner2.chromosome[i]
+#                 used_in_child2.add(partner2.chromosome[i])
+#     # Fill in any missing genes to avoid None values
+#     for i in range(len(partner1.chromosome)):
+#         if child1[i] is None:
+#             for gene in partner1.chromosome:
+#                 if gene not in used_in_child1:
+#                     child1[i] = gene
+#                     used_in_child1.add(gene)
+#                     break
+#         if child2[i] is None:
+#             for gene in partner2.chromosome:
+#                 if gene not in used_in_child2:
+#                     child2[i] = gene
+#                     used_in_child2.add(gene)
+#                     break
+#     return Individual(child1, distance_matrix), Individual(child2, distance_matrix)
 
 def cycle_crossover(partner1, partner2, distance_matrix):
     ''' Return 2 children
@@ -190,11 +190,3 @@ def order_crossover(partner1, partner2, distance_matrix):
             k = (k + 1) % len(partner1.chromosome)
     return Individual(child1, distance_matrix), Individual(child2, distance_matrix)
 ################################### Crossover ################################################
-
-
-if __name__ == '__main__':
-    route_a = Individual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-    route_b = Individual([4, 5 ,2, 1, 8, 0, 7, 6, 9, 3])
-    child_a, child_b = order_crossover(route_a, route_b)
-    print(child_a.chromosome)
-    print(child_b.chromosome)       
