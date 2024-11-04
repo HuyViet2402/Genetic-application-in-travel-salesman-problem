@@ -44,7 +44,9 @@ def tournament_selection(population, k=10):
         Time complexity: O(1)
         Space complexity: O(1)
     '''
-    start = random.randint(0, POPULATION_SIZE - k)
-    end = start + k
-    return min(population[start:end], key=lambda x: x.fitness)
+    tournament = []
+    for _ in range(k):
+        tournament.append(population[random.randint(0, POPULATION_SIZE-1)])
+
+    return min(tournament, key=lambda x: x.fitness)
 ################################### Selection ################################################
